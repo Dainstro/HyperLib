@@ -143,20 +143,26 @@ local Utils = {
             end)
         end)
     end,
-    AddHover = function(element, hoverProps, leaveProps)
+    AddHover = function(element, scale)
+        scale = scale or 1.05
+        local hoverSize = UDim2.new(element.Size.X.Scale * scale, element.Size.X.Offset, element.Size.Y.Scale * scale, element.Size.Y.Offset)
+        local leaveSize = element.Size
         element.MouseEnter:Connect(function()
-            Utils.TweenFrame(element, hoverProps or {Size = element.Size * 1.05}, 0.1)
+            Utils.TweenFrame(element, {Size = hoverSize}, 0.1)
         end)
         element.MouseLeave:Connect(function()
-            Utils.TweenFrame(element, leaveProps or {Size = element.Size}, 0.1)
+            Utils.TweenFrame(element, {Size = leaveSize}, 0.1)
         end)
     end,
-    AddPress = function(element, pressProps, releaseProps)
+    AddPress = function(element, scale)
+        scale = scale or 0.95
+        local pressSize = UDim2.new(element.Size.X.Scale * scale, element.Size.X.Offset, element.Size.Y.Scale * scale, element.Size.Y.Offset)
+        local releaseSize = element.Size
         element.MouseButton1Down:Connect(function()
-            Utils.TweenFrame(element, pressProps or {Size = element.Size * 0.95}, 0.05)
+            Utils.TweenFrame(element, {Size = pressSize}, 0.05)
         end)
         element.MouseButton1Up:Connect(function()
-            Utils.TweenFrame(element, releaseProps or {Size = element.Size}, 0.05)
+            Utils.TweenFrame(element, {Size = releaseSize}, 0.05)
         end)
     end,
     ApplyTheme = function(obj)
@@ -213,7 +219,7 @@ local Events = {
     end
 }
 
--- Config
+-- Config Fixed
 local Config = {
     Profiles = {"default"},
     Autosave = true,
@@ -228,9 +234,15 @@ local Config = {
     Load = function(profile)
         local config = Utils.LoadConfig(profile)
         for k, v in pairs(config) do
-            local idx = k:gsub("T_", "") or k:gsub("O_", "")
-            if Toggles[idx] then Toggles[idx]:SetValue(v) end
-            if Options[idx] then Options[idx]:SetValue(v) end
+            local prefix = string.sub(k, 1, 2)
+            local idx = k
+            if prefix == "T_" then
+                idx = string.sub(k, 3)
+                if Toggles[idx] then Toggles[idx]:SetValue(v) end
+            elseif prefix == "O_" then
+                idx = string.sub(k, 3)
+                if Options[idx] then Options[idx]:SetValue(v) end
+            end
         end
         Config.CurrentProfile = profile
     end,
@@ -240,7 +252,7 @@ local Config = {
     end
 }
 
--- Base Control (with Undo/Redo)
+-- Controls (All Implemented)
 local Control = {}
 Control.__index = Control
 function Control.new(parent, index, opts)
@@ -276,7 +288,7 @@ function Control:Redo()
     end 
 end
 
--- Toggle/Checkbox
+-- Toggle
 local ToggleControl = setmetatable({}, {__index = Control})
 function ToggleControl.new(parent, index, opts)
     local self = Control.new(parent, index, opts)
@@ -304,8 +316,7 @@ function ToggleControl.new(parent, index, opts)
     update(self.Value)
     function self:OnChanged(cb) Events.OnChange(self.Index, cb) end
     function self:SetValue(v) update(v) end
-    Utils.AddHover(self.Frame)
-    -- Chaining
+    Utils.AddHover(self.Frame, 1.02)
     function self:AddColorPicker(idx, cOpts) 
         local cp = ColorPickerControl.new(self.Frame, idx, cOpts)
         cp.Frame.Position = UDim2.new(0, 0, 1, 5)
@@ -313,6 +324,9 @@ function ToggleControl.new(parent, index, opts)
     end
     return self
 end
+
+-- Checkbox alias
+local CheckboxControl = ToggleControl
 
 -- Slider
 local SliderControl = setmetatable({}, {__index = Control})
@@ -357,7 +371,7 @@ function SliderControl.new(parent, index, opts)
     update(self.Value)
     function self:OnChanged(cb) Events.OnChange(self.Index, cb) end
     function self:SetValue(v) update(v) end
-    Utils.AddHover(thumb, {Size = UDim2.new(0, 20, 1, 0)})
+    Utils.AddHover(thumb, 1.2)
     return self
 end
 
@@ -1120,3 +1134,4 @@ _G.RadioControl = RadioControl
 
 getgenv().Library = Library
 return Library
+
