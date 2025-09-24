@@ -1,6 +1,3 @@
--- HyperLib.lua
--- Ground-up responsive UI library
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -36,7 +33,8 @@ function HyperLib.new(title)
 	Container.Name = "Container"
 	Container.Size = UDim2.new(0, 600, 0, 400)
 	Container.Position = UDim2.new(0.5, -300, 0.5, -200)
-	Container.BackgroundColor3 = Color3.fromRGB(55, 55, 70) -- Gray + dark blue/purple tint
+	Container.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+	Container.BackgroundTransparency = 0 -- Set to fully opaque
 	Container.BorderSizePixel = 0
 	Container.ClipsDescendants = true
 	Container.Parent = ScreenGui
@@ -53,7 +51,12 @@ function HyperLib.new(title)
 	TopBar.Size = UDim2.new(1, 0, 0.12, 0)
 	TopBar.Position = UDim2.new(0, 0, 0, 0)
 	TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+	TopBar.BackgroundTransparency = 0 -- Set to fully opaque
 	TopBar.Parent = Container
+
+	local TopBarCorner = Instance.new("UICorner")
+	TopBarCorner.CornerRadius = UDim.new(0, 16)
+	TopBarCorner.Parent = TopBar
 
 	local TitleLabel = Instance.new("TextLabel")
 	TitleLabel.Size = UDim2.new(1, -20, 1, 0)
@@ -75,7 +78,12 @@ function HyperLib.new(title)
 	SideBar.Size = UDim2.new(normalWidth, 0, 0.88, 0)
 	SideBar.Position = UDim2.new(0, 0, 0.12, 0)
 	SideBar.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+	SideBar.BackgroundTransparency = 0 -- Set to fully opaque
 	SideBar.Parent = Container
+
+	local SideBarCorner = Instance.new("UICorner")
+	SideBarCorner.CornerRadius = UDim.new(0, 16)
+	SideBarCorner.Parent = SideBar
 
 	local UIListLayout = Instance.new("UIListLayout")
 	UIListLayout.Padding = UDim.new(0, 6)
@@ -91,8 +99,14 @@ function HyperLib.new(title)
 	ContentFrame.Position = UDim2.new(normalWidth, 0, 0.12, 0)
 	ContentFrame.Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
 	ContentFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
+	ContentFrame.BackgroundTransparency = 0 -- Set to fully opaque
 	ContentFrame.ClipsDescendants = true
 	ContentFrame.Parent = Container
+
+	local ContentCorner = Instance.new("UICorner")
+	ContentCorner.CornerRadius = UDim.new(0, 16)
+	ContentCorner.Parent = ContentFrame
+
 	self.ContentFrame = ContentFrame
 
 	-- Sidebar hover expand/collapse
@@ -156,6 +170,7 @@ function HyperLib:AddTab(name)
 	tab.Button = Instance.new("TextButton")
 	tab.Button.Size = UDim2.new(1, -8, 0, 40)
 	tab.Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115)
+	tab.Button.BackgroundTransparency = 0 -- Set to fully opaque
 	tab.Button.AutoButtonColor = true
 	tab.Button.Parent = self.SideBar
 
@@ -188,9 +203,14 @@ function HyperLib:AddTab(name)
 	-- Content frame
 	local TabFrame = Instance.new("Frame")
 	TabFrame.Size = UDim2.new(1, 0, 1, 0)
-	TabFrame.BackgroundTransparency = 1
+	TabFrame.BackgroundTransparency = 0 -- Set to fully opaque
+	TabFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
 	TabFrame.Visible = false
 	TabFrame.Parent = self.ContentFrame
+
+	local TabCorner = Instance.new("UICorner")
+	TabCorner.CornerRadius = UDim.new(0, 8)
+	TabCorner.Parent = TabFrame
 
 	local Img = Instance.new("ImageLabel")
 	Img.Size = UDim2.new(1, 0, 1, 0)
@@ -201,12 +221,20 @@ function HyperLib:AddTab(name)
 	tab.Frame = TabFrame
 	self.Tabs[name] = tab
 
+	-- Ensure first tab is visible by default
+	if #self.SideBar:GetChildren() == 2 then -- First child is UIListLayout
+		tab.Frame.Visible = true
+		tab.Button.BackgroundColor3 = Color3.fromRGB(100, 100, 130) -- Highlight first tab
+	end
+
 	-- Button click
 	tab.Button.MouseButton1Click:Connect(function()
 		for _, t in pairs(self.Tabs) do
 			t.Frame.Visible = false
+			t.Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115) -- Reset color
 		end
 		tab.Frame.Visible = true
+		tab.Button.BackgroundColor3 = Color3.fromRGB(100, 100, 130) -- Highlight selected tab
 	end)
 
 	return tab.Frame
