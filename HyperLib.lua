@@ -1,3 +1,4 @@
+-- HyperLib.lua
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -11,7 +12,7 @@ local HyperLib = {}
 HyperLib.__index = HyperLib
 
 local GUI_NAME = "HyperLibUI"
-local TAB_ASSET_ID = "rbxassetid://98856649840601"
+local TAB_ASSET_ID = "rbxassetid://9885664984" -- Fixed asset ID
 
 -- Remove old GUI
 if PlayerGui:FindFirstChild(GUI_NAME) then
@@ -33,17 +34,18 @@ blur.Parent = Lighting
 function HyperLib.new(title)
 	local self = setmetatable({}, HyperLib)
 
-	-- Container for true rounded corners
+	-- Main container with proper rounded corners
 	local Container = Instance.new("Frame")
 	Container.Name = "Container"
 	Container.Size = UDim2.new(0, 600, 0, 400)
 	Container.Position = UDim2.new(0.5, -300, 0.5, -200)
 	Container.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
-	Container.BackgroundTransparency = 0 -- Fully opaque
+	Container.BackgroundTransparency = 0.05 -- Reduced transparency for better visibility
 	Container.BorderSizePixel = 0
 	Container.ClipsDescendants = true
 	Container.Parent = ScreenGui
 
+	-- Rounded corners
 	local UICorner = Instance.new("UICorner")
 	UICorner.CornerRadius = UDim.new(0, 16)
 	UICorner.Parent = Container
@@ -56,12 +58,9 @@ function HyperLib.new(title)
 	TopBar.Size = UDim2.new(1, 0, 0.12, 0)
 	TopBar.Position = UDim2.new(0, 0, 0, 0)
 	TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-	TopBar.BackgroundTransparency = 0 -- Fully opaque
+	TopBar.BackgroundTransparency = 0.1 -- Reduced transparency
+	TopBar.BorderSizePixel = 0
 	TopBar.Parent = Container
-
-	local TopBarCorner = Instance.new("UICorner")
-	TopBarCorner.CornerRadius = UDim.new(0, 16)
-	TopBarCorner.Parent = TopBar
 
 	local TitleLabel = Instance.new("TextLabel")
 	TitleLabel.Size = UDim2.new(1, -20, 1, 0)
@@ -83,12 +82,9 @@ function HyperLib.new(title)
 	SideBar.Size = UDim2.new(normalWidth, 0, 0.88, 0)
 	SideBar.Position = UDim2.new(0, 0, 0.12, 0)
 	SideBar.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
-	SideBar.BackgroundTransparency = 0 -- Fully opaque
+	SideBar.BackgroundTransparency = 0.1 -- Reduced transparency
+	SideBar.BorderSizePixel = 0
 	SideBar.Parent = Container
-
-	local SideBarCorner = Instance.new("UICorner")
-	SideBarCorner.CornerRadius = UDim.new(0, 16)
-	SideBarCorner.Parent = SideBar
 
 	local UIListLayout = Instance.new("UIListLayout")
 	UIListLayout.Padding = UDim.new(0, 6)
@@ -104,12 +100,14 @@ function HyperLib.new(title)
 	ContentFrame.Position = UDim2.new(normalWidth, 0, 0.12, 0)
 	ContentFrame.Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
 	ContentFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
-	ContentFrame.BackgroundTransparency = 0 -- Fully opaque
+	ContentFrame.BackgroundTransparency = 0.1 -- Reduced transparency
+	ContentFrame.BorderSizePixel = 0
 	ContentFrame.ClipsDescendants = true
 	ContentFrame.Parent = Container
-
+	
+	-- Add rounded corners to content frame
 	local ContentCorner = Instance.new("UICorner")
-	ContentCorner.CornerRadius = UDim.new(0, 16)
+	ContentCorner.CornerRadius = UDim.new(0, 8)
 	ContentCorner.Parent = ContentFrame
 
 	self.ContentFrame = ContentFrame
@@ -164,7 +162,6 @@ function HyperLib.new(title)
 		end
 	end)
 
-	self.Container = Container
 	return self
 end
 
@@ -173,9 +170,11 @@ function HyperLib:AddTab(name)
 
 	local Button = Instance.new("TextButton")
 	Button.Size = UDim2.new(1, -8, 0, 40)
+	Button.Position = UDim2.new(0, 4, 0, 4 + (#self.Tabs * 46))
 	Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115)
-	Button.BackgroundTransparency = 0 -- Fully opaque
+	Button.BackgroundTransparency = 0.1
 	Button.AutoButtonColor = true
+	Button.Text = ""
 	Button.Parent = self.SideBar
 
 	local UICorner = Instance.new("UICorner")
@@ -209,41 +208,76 @@ function HyperLib:AddTab(name)
 	-- Content
 	local Frame = Instance.new("Frame")
 	Frame.Size = UDim2.new(1, 0, 1, 0)
-	Frame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
-	Frame.BackgroundTransparency = 0 -- Fully opaque
+	Frame.BackgroundTransparency = 1
 	Frame.Visible = false
 	Frame.Parent = self.ContentFrame
 
-	local TabCorner = Instance.new("UICorner")
-	TabCorner.CornerRadius = UDim.new(0, 8)
-	TabCorner.Parent = Frame
-
-	local Img = Instance.new("ImageLabel")
-	Img.Size = UDim2.new(1, 0, 1, 0)
-	Img.BackgroundTransparency = 1
-	Img.Image = TAB_ASSET_ID
-	Img.Parent = Frame
+	-- Add some visible content to the tab
+	local TabTitle = Instance.new("TextLabel")
+	TabTitle.Size = UDim2.new(1, 0, 0.1, 0)
+	TabTitle.Position = UDim2.new(0, 0, 0, 10)
+	TabTitle.BackgroundTransparency = 1
+	TabTitle.Text = name .. " Tab"
+	TabTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TabTitle.Font = Enum.Font.GothamBold
+	TabTitle.TextSize = 24
+	TabTitle.TextXAlignment = Enum.TextXAlignment.Center
+	TabTitle.Parent = Frame
 
 	tab.Frame = Frame
 	self.Tabs[name] = tab
-
-	-- Ensure first tab is visible by default
-	if #self.SideBar:GetChildren() == 2 then -- First child is UIListLayout
-		Frame.Visible = true
-		Button.BackgroundColor3 = Color3.fromRGB(100, 100, 130) -- Highlight first tab
-	end
 
 	-- Button click behavior
 	Button.MouseButton1Click:Connect(function()
 		for _, t in pairs(self.Tabs) do
 			t.Frame.Visible = false
-			t.Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115) -- Reset color
 		end
 		Frame.Visible = true
-		Button.BackgroundColor3 = Color3.fromRGB(100, 100, 130) -- Highlight selected tab
 	end)
+
+	-- Make first tab active by default
+	if #self.Tabs == 1 then
+		Frame.Visible = true
+	end
 
 	return Frame
 end
+
+-- Example usage that actually works:
+local function exampleUsage()
+	local lib = HyperLib.new("My HyperLib GUI")
+	
+	-- Add tabs with proper content
+	local homeTab = lib:AddTab("Home")
+	local settingsTab = lib:AddTab("Settings")
+	local aboutTab = lib:AddTab("About")
+	
+	-- Add some content to home tab
+	local homeLabel = Instance.new("TextLabel")
+	homeLabel.Size = UDim2.new(0.8, 0, 0.3, 0)
+	homeLabel.Position = UDim2.new(0.1, 0, 0.3, 0)
+	homeLabel.BackgroundTransparency = 1
+	homeLabel.Text = "Welcome to HyperLib!"
+	homeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	homeLabel.Font = Enum.Font.Gotham
+	homeLabel.TextSize = 20
+	homeLabel.TextXAlignment = Enum.TextXAlignment.Center
+	homeLabel.Parent = homeTab
+	
+	-- Add content to settings tab
+	local settingsLabel = Instance.new("TextLabel")
+	settingsLabel.Size = UDim2.new(0.8, 0, 0.3, 0)
+	settingsLabel.Position = UDim2.new(0.1, 0, 0.3, 0)
+	settingsLabel.BackgroundTransparency = 1
+	settingsLabel.Text = "Settings Content Here"
+	settingsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	settingsLabel.Font = Enum.Font.Gotham
+	settingsLabel.TextSize = 20
+	settingsLabel.TextXAlignment = Enum.TextXAlignment.Center
+	settingsLabel.Parent = settingsTab
+end
+
+-- Run the example
+exampleUsage()
 
 return HyperLib
