@@ -1,4 +1,3 @@
--- HyperLib_v2.lua
 -- Feature-complete GUI library per your spec:
 -- - Opaque default GUI (BluishGray theme)
 -- - Theme support with easy custom themes
@@ -454,3 +453,4 @@ about:Notify(true)
 --]]
 
 return Hyper
+
