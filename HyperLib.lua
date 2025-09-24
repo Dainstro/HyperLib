@@ -1,10 +1,11 @@
 -- HyperLib.lua
--- Responsive UI Library with tab system and hover-expanding side panel
+-- Clean + efficient Roblox UI library with expanding sidebar + tab system
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
@@ -14,7 +15,7 @@ HyperLib.__index = HyperLib
 local GUI_NAME = "HyperLibUI"
 local TAB_ASSET_ID = "rbxassetid://98856649840601"
 
--- Destroy existing
+-- Clear any old copies
 if PlayerGui:FindFirstChild(GUI_NAME) then
 	PlayerGui[GUI_NAME]:Destroy()
 end
@@ -22,35 +23,30 @@ end
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = GUI_NAME
-ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
+-- Constructor
 function HyperLib.new(title)
 	local self = setmetatable({}, HyperLib)
 
 	-- Main frame
 	local MainFrame = Instance.new("Frame")
 	MainFrame.Name = "MainFrame"
-	MainFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 70) -- Gray w/ stronger blue-purple tint
+	MainFrame.BackgroundColor3 = Color3.fromRGB(55, 55, 70) -- gray w/ dark blue-purple tint
 	MainFrame.BorderSizePixel = 0
 	MainFrame.ClipsDescendants = true
 	MainFrame.Parent = ScreenGui
 
-	local UICornerMain = Instance.new("UICorner")
-	UICornerMain.CornerRadius = UDim.new(0, 12)
-	UICornerMain.Parent = MainFrame
-
-	-- Aspect ratio
-	local Aspect = Instance.new("UIAspectRatioConstraint")
-	Aspect.AspectRatio = 3.5 / 2
-	Aspect.Parent = MainFrame
+	local UICorner = Instance.new("UICorner")
+	UICorner.CornerRadius = UDim.new(0, 14)
+	UICorner.Parent = MainFrame
 
 	-- Top bar
 	local TopBar = Instance.new("Frame")
 	TopBar.Name = "TopBar"
-	TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
-	TopBar.BackgroundTransparency = 0.1
+	TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 	TopBar.Size = UDim2.new(1, 0, 0.12, 0)
 	TopBar.Parent = MainFrame
 
@@ -61,29 +57,28 @@ function HyperLib.new(title)
 	TitleLabel.TextColor3 = Color3.fromRGB(230, 230, 245)
 	TitleLabel.TextScaled = true
 	TitleLabel.Font = Enum.Font.GothamBold
-	TitleLabel.Text = title or "HyperLib"
 	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	TitleLabel.Text = title or "HyperLib"
 	TitleLabel.Parent = TopBar
 
-	-- Side panel (collapsible)
-	local normalWidth, expandedWidth = 0.08, 0.2
-	local SidePanel = Instance.new("Frame")
-	SidePanel.Name = "SidePanel"
-	SidePanel.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-	SidePanel.BackgroundTransparency = 0.15
-	SidePanel.Size = UDim2.new(normalWidth, 0, 0.88, 0)
-	SidePanel.Position = UDim2.new(0, 0, 0.12, 0)
-	SidePanel.Parent = MainFrame
+	-- Sidebar
+	local normalWidth, expandedWidth = 0.1, 0.22
+	local SideBar = Instance.new("Frame")
+	SideBar.Name = "SideBar"
+	SideBar.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+	SideBar.Size = UDim2.new(normalWidth, 0, 0.88, 0)
+	SideBar.Position = UDim2.new(0, 0, 0.12, 0)
+	SideBar.Parent = MainFrame
 
-	local TabLayout = Instance.new("UIListLayout")
-	TabLayout.Padding = UDim.new(0, 6)
-	TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	TabLayout.Parent = SidePanel
+	local UIListLayout = Instance.new("UIListLayout")
+	UIListLayout.Padding = UDim.new(0, 4)
+	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	UIListLayout.Parent = SideBar
 
 	-- Content area
 	local ContentFrame = Instance.new("Frame")
 	ContentFrame.Name = "ContentFrame"
-	ContentFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 85)
+	ContentFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
 	ContentFrame.Position = UDim2.new(normalWidth, 0, 0.12, 0)
 	ContentFrame.Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
 	ContentFrame.ClipsDescendants = true
@@ -91,40 +86,32 @@ function HyperLib.new(title)
 
 	-- Hover expand
 	local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local isExpanded = false
-	SidePanel.MouseEnter:Connect(function()
-		if not isExpanded then
-			isExpanded = true
-			TweenService:Create(SidePanel, tweenInfo, {Size = UDim2.new(expandedWidth, 0, 0.88, 0)}):Play()
-			TweenService:Create(ContentFrame, tweenInfo, {
-				Position = UDim2.new(expandedWidth, 0, 0.12, 0),
-				Size = UDim2.new(1 - expandedWidth, 0, 0.88, 0)
-			}):Play()
-		end
+	SideBar.MouseEnter:Connect(function()
+		TweenService:Create(SideBar, tweenInfo, {Size = UDim2.new(expandedWidth, 0, 0.88, 0)}):Play()
+		TweenService:Create(ContentFrame, tweenInfo, {
+			Position = UDim2.new(expandedWidth, 0, 0.12, 0),
+			Size = UDim2.new(1 - expandedWidth, 0, 0.88, 0)
+		}):Play()
 	end)
-	SidePanel.MouseLeave:Connect(function()
-		if isExpanded then
-			isExpanded = false
-			TweenService:Create(SidePanel, tweenInfo, {Size = UDim2.new(normalWidth, 0, 0.88, 0)}):Play()
-			TweenService:Create(ContentFrame, tweenInfo, {
-				Position = UDim2.new(normalWidth, 0, 0.12, 0),
-				Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
-			}):Play()
-		end
+	SideBar.MouseLeave:Connect(function()
+		TweenService:Create(SideBar, tweenInfo, {Size = UDim2.new(normalWidth, 0, 0.88, 0)}):Play()
+		TweenService:Create(ContentFrame, tweenInfo, {
+			Position = UDim2.new(normalWidth, 0, 0.12, 0),
+			Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
+		}):Play()
 	end)
 
 	-- Dragging
-	local dragging, dragStartPos, startPos
+	local dragging, dragStart, startPos
 	TopBar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
-			dragStartPos = input.Position
+			dragStart = input.Position
 			startPos = MainFrame.Position
-
 			local moveCon, releaseCon
 			moveCon = UserInputService.InputChanged:Connect(function(i)
 				if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-					local delta = i.Position - dragStartPos
+					local delta = i.Position - dragStart
 					MainFrame.Position = UDim2.new(
 						startPos.X.Scale, startPos.X.Offset + delta.X,
 						startPos.Y.Scale, startPos.Y.Offset + delta.Y
@@ -152,50 +139,57 @@ function HyperLib.new(title)
 	updateSize()
 	RunService:GetPropertyChangedSignal("ViewportSize"):Connect(updateSize)
 
-	-- Save references
+	-- Save refs
 	self.MainFrame = MainFrame
-	self.SidePanel = SidePanel
+	self.SideBar = SideBar
 	self.ContentFrame = ContentFrame
 	self.Tabs = {}
 	return self
 end
 
 function HyperLib:AddTab(name)
-	local button = Instance.new("TextButton")
-	button.Text = name
-	button.Size = UDim2.new(1, -10, 0, 32)
-	button.Position = UDim2.new(0, 5, 0, 0)
-	button.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-	button.TextColor3 = Color3.fromRGB(240, 240, 255)
-	button.Font = Enum.Font.Gotham
-	button.TextSize = 15
-	button.AutoButtonColor = true
-	button.Parent = self.SidePanel
+	-- Sidebar button
+	local Button = Instance.new("TextButton")
+	Button.Size = UDim2.new(1, -8, 0, 36)
+	Button.Position = UDim2.new(0, 4, 0, 0)
+	Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115)
+	Button.TextColor3 = Color3.fromRGB(240, 240, 255)
+	Button.Font = Enum.Font.Gotham
+	Button.TextSize = 16
+	Button.Text = name
+	Button.AutoButtonColor = true
+	Button.Parent = self.SideBar
 
-	local tabFrame = Instance.new("Frame")
-	tabFrame.Name = name .. "Content"
-	tabFrame.Size = UDim2.new(1, 0, 1, 0)
-	tabFrame.BackgroundTransparency = 1
-	tabFrame.Visible = false
-	tabFrame.Parent = self.ContentFrame
+	local UICorner = Instance.new("UICorner")
+	UICorner.CornerRadius = UDim.new(0, 8)
+	UICorner.Parent = Button
 
-	-- Default asset
-	local img = Instance.new("ImageLabel")
-	img.BackgroundTransparency = 1
-	img.Size = UDim2.new(1, 0, 1, 0)
-	img.Image = TAB_ASSET_ID
-	img.Parent = tabFrame
+	-- Content frame
+	local TabFrame = Instance.new("Frame")
+	TabFrame.Name = name .. "Content"
+	TabFrame.Size = UDim2.new(1, 0, 1, 0)
+	TabFrame.BackgroundTransparency = 1
+	TabFrame.Visible = false
+	TabFrame.Parent = self.ContentFrame
 
-	self.Tabs[name] = tabFrame
+	-- Default asset image
+	local Img = Instance.new("ImageLabel")
+	Img.BackgroundTransparency = 1
+	Img.Size = UDim2.new(1, 0, 1, 0)
+	Img.Image = TAB_ASSET_ID
+	Img.Parent = TabFrame
 
-	button.MouseButton1Click:Connect(function()
-		for _, f in pairs(self.ContentFrame:GetChildren()) do
+	-- Button behavior
+	Button.MouseButton1Click:Connect(function()
+		for _, f in ipairs(self.ContentFrame:GetChildren()) do
 			if f:IsA("Frame") then f.Visible = false end
 		end
-		tabFrame.Visible = true
+		TabFrame.Visible = true
 	end)
 
-	return tabFrame
+	-- Store ref
+	self.Tabs[name] = TabFrame
+	return TabFrame
 end
 
 return HyperLib
