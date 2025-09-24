@@ -26,7 +26,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = PlayerGui
 
--- Add global blur effect behind the UI
+-- Add global blur behind UI
 local blur = Instance.new("BlurEffect")
 blur.Size = 20
 blur.Parent = Lighting
@@ -34,40 +34,43 @@ blur.Parent = Lighting
 function HyperLib.new(title)
 	local self = setmetatable({}, HyperLib)
 
-	-- Container for true rounded corners
+	-- Main container for rounded corners
 	local Container = Instance.new("Frame")
 	Container.Name = "Container"
 	Container.Size = UDim2.new(0, 600, 0, 400)
 	Container.Position = UDim2.new(0.5, -300, 0.5, -200)
 	Container.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
-	Container.BackgroundTransparency = 0.2 -- semi-opaque
+	Container.BackgroundTransparency = 0.3 -- semi-opaque
 	Container.BorderSizePixel = 0
 	Container.ClipsDescendants = true
 	Container.Parent = ScreenGui
 
-	local UICorner = Instance.new("UICorner")
-	UICorner.CornerRadius = UDim.new(0, 16)
-	UICorner.Parent = Container
+	local ContainerCorner = Instance.new("UICorner")
+	ContainerCorner.CornerRadius = UDim.new(0,16)
+	ContainerCorner.Parent = Container
 
 	self.Container = Container
 
-	-- Top bar (draggable)
+	-- Top bar
 	local TopBar = Instance.new("Frame")
-	TopBar.Name = "TopBar"
-	TopBar.Size = UDim2.new(1, 0, 0.12, 0)
-	TopBar.Position = UDim2.new(0, 0, 0, 0)
-	TopBar.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+	TopBar.Size = UDim2.new(1,0,0.12,0)
+	TopBar.Position = UDim2.new(0,0,0,0)
+	TopBar.BackgroundColor3 = Color3.fromRGB(45,45,65)
 	TopBar.BackgroundTransparency = 0.3
 	TopBar.Parent = Container
 
+	local TopBarCorner = Instance.new("UICorner")
+	TopBarCorner.CornerRadius = UDim.new(0,16)
+	TopBarCorner.Parent = TopBar
+
 	local TitleLabel = Instance.new("TextLabel")
-	TitleLabel.Size = UDim2.new(1, -20, 1, 0)
-	TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+	TitleLabel.Size = UDim2.new(1,-20,1,0)
+	TitleLabel.Position = UDim2.new(0,10,0,0)
 	TitleLabel.BackgroundTransparency = 1
 	TitleLabel.Text = title or "HyperLib"
 	TitleLabel.TextScaled = true
 	TitleLabel.Font = Enum.Font.GothamBold
-	TitleLabel.TextColor3 = Color3.fromRGB(230, 230, 245)
+	TitleLabel.TextColor3 = Color3.fromRGB(230,230,245)
 	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	TitleLabel.Parent = TopBar
 
@@ -76,15 +79,19 @@ function HyperLib.new(title)
 	-- Sidebar
 	local normalWidth, expandedWidth = 0.08, 0.22
 	local SideBar = Instance.new("Frame")
-	SideBar.Name = "SideBar"
-	SideBar.Size = UDim2.new(normalWidth, 0, 0.88, 0)
-	SideBar.Position = UDim2.new(0, 0, 0.12, 0)
-	SideBar.BackgroundColor3 = Color3.fromRGB(65, 65, 90)
+	SideBar.Size = UDim2.new(normalWidth,0,0.88,0)
+	SideBar.Position = UDim2.new(0,0,0.12,0)
+	SideBar.BackgroundColor3 = Color3.fromRGB(65,65,90)
 	SideBar.BackgroundTransparency = 0.25
+	SideBar.ClipsDescendants = true
 	SideBar.Parent = Container
 
+	local SideCorner = Instance.new("UICorner")
+	SideCorner.CornerRadius = UDim.new(0,16)
+	SideCorner.Parent = SideBar
+
 	local UIListLayout = Instance.new("UIListLayout")
-	UIListLayout.Padding = UDim.new(0, 6)
+	UIListLayout.Padding = UDim.new(0,6)
 	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	UIListLayout.Parent = SideBar
 
@@ -93,58 +100,57 @@ function HyperLib.new(title)
 
 	-- Content frame
 	local ContentFrame = Instance.new("Frame")
-	ContentFrame.Name = "ContentFrame"
-	ContentFrame.Position = UDim2.new(normalWidth, 0, 0.12, 0)
-	ContentFrame.Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
-	ContentFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 100)
+	ContentFrame.Position = UDim2.new(normalWidth,0,0.12,0)
+	ContentFrame.Size = UDim2.new(1-normalWidth,0,0.88,0)
+	ContentFrame.BackgroundColor3 = Color3.fromRGB(75,75,100)
 	ContentFrame.BackgroundTransparency = 0.25
 	ContentFrame.ClipsDescendants = true
 	ContentFrame.Parent = Container
 	self.ContentFrame = ContentFrame
 
-	-- Sidebar hover expand/collapse
-	local hoverTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	-- Sidebar hover expand
+	local hoverTween = TweenInfo.new(0.2,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
 	SideBar.MouseEnter:Connect(function()
-		TweenService:Create(SideBar, hoverTween, {Size = UDim2.new(expandedWidth, 0, 0.88, 0)}):Play()
-		TweenService:Create(ContentFrame, hoverTween, {
-			Position = UDim2.new(expandedWidth, 0, 0.12, 0),
-			Size = UDim2.new(1 - expandedWidth, 0, 0.88, 0)
+		TweenService:Create(SideBar,hoverTween,{Size=UDim2.new(expandedWidth,0,0.88,0)}):Play()
+		TweenService:Create(ContentFrame,hoverTween,{
+			Position=UDim2.new(expandedWidth,0,0.12,0),
+			Size=UDim2.new(1-expandedWidth,0,0.88,0)
 		}):Play()
-		for _, tab in pairs(self.Tabs) do
-			tab.Label.Visible = true
+		for _,t in pairs(self.Tabs) do
+			t.Label.Visible = true
 		end
 	end)
 	SideBar.MouseLeave:Connect(function()
-		TweenService:Create(SideBar, hoverTween, {Size = UDim2.new(normalWidth, 0, 0.88, 0)}):Play()
-		TweenService:Create(ContentFrame, hoverTween, {
-			Position = UDim2.new(normalWidth, 0, 0.12, 0),
-			Size = UDim2.new(1 - normalWidth, 0, 0.88, 0)
+		TweenService:Create(SideBar,hoverTween,{Size=UDim2.new(normalWidth,0,0.88,0)}):Play()
+		TweenService:Create(ContentFrame,hoverTween,{
+			Position=UDim2.new(normalWidth,0,0.12,0),
+			Size=UDim2.new(1-normalWidth,0,0.88,0)
 		}):Play()
-		for _, tab in pairs(self.Tabs) do
-			tab.Label.Visible = false
+		for _,t in pairs(self.Tabs) do
+			t.Label.Visible = false
 		end
 	end)
 
 	-- Dragging
 	local dragging, dragStart, startPos
 	TopBar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragging = true
-			dragStart = input.Position
-			startPos = Container.Position
+		if input.UserInputType==Enum.UserInputType.MouseButton1 then
+			dragging=true
+			dragStart=input.Position
+			startPos=Container.Position
 			local moveCon, releaseCon
-			moveCon = UserInputService.InputChanged:Connect(function(i)
-				if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-					local delta = i.Position - dragStart
-					Container.Position = UDim2.new(
-						startPos.X.Scale, startPos.X.Offset + delta.X,
-						startPos.Y.Scale, startPos.Y.Offset + delta.Y
+			moveCon=UserInputService.InputChanged:Connect(function(i)
+				if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
+					local delta=i.Position-dragStart
+					Container.Position=UDim2.new(
+						startPos.X.Scale,startPos.X.Offset+delta.X,
+						startPos.Y.Scale,startPos.Y.Offset+delta.Y
 					)
 				end
 			end)
-			releaseCon = input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
+			releaseCon=input.Changed:Connect(function()
+				if input.UserInputState==Enum.UserInputState.End then
+					dragging=false
 					moveCon:Disconnect()
 					releaseCon:Disconnect()
 				end
@@ -159,61 +165,59 @@ function HyperLib:AddTab(name)
 	local tab = {}
 
 	local Button = Instance.new("TextButton")
-	Button.Size = UDim2.new(1, -8, 0, 40)
-	Button.BackgroundColor3 = Color3.fromRGB(85, 85, 115)
-	Button.AutoButtonColor = true
-	Button.Parent = self.SideBar
+	Button.Size = UDim2.new(1,-8,0,40)
+	Button.BackgroundColor3 = Color3.fromRGB(85,85,115)
+	Button.AutoButtonColor=true
+	Button.Parent=self.SideBar
+	Button.ZIndex=2
 
-	local UICorner = Instance.new("UICorner")
-	UICorner.CornerRadius = UDim.new(0, 8)
-	UICorner.Parent = Button
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius=UDim.new(0,8)
+	Corner.Parent=Button
 
-	-- Icon
 	local Icon = Instance.new("ImageLabel")
-	Icon.Size = UDim2.new(0, 28, 0, 28)
-	Icon.Position = UDim2.new(0, 6, 0.5, -14)
-	Icon.BackgroundTransparency = 1
-	Icon.Image = TAB_ASSET_ID
-	Icon.Parent = Button
+	Icon.Size=UDim2.new(0,28,0,28)
+	Icon.Position=UDim2.new(0,6,0.5,-14)
+	Icon.BackgroundTransparency=1
+	Icon.Image=TAB_ASSET_ID
+	Icon.Parent=Button
 
-	-- Label
 	local Label = Instance.new("TextLabel")
-	Label.Size = UDim2.new(1, -40, 1, 0)
-	Label.Position = UDim2.new(0, 40, 0, 0)
-	Label.BackgroundTransparency = 1
-	Label.Text = name
-	Label.TextColor3 = Color3.fromRGB(240, 240, 255)
-	Label.Font = Enum.Font.Gotham
-	Label.TextSize = 16
-	Label.TextXAlignment = Enum.TextXAlignment.Left
-	Label.Visible = false
-	Label.Parent = Button
+	Label.Size=UDim2.new(1,-40,1,0)
+	Label.Position=UDim2.new(0,40,0,0)
+	Label.BackgroundTransparency=1
+	Label.Text=name
+	Label.TextColor3=Color3.fromRGB(240,240,255)
+	Label.Font=Enum.Font.Gotham
+	Label.TextSize=16
+	Label.TextXAlignment=Enum.TextXAlignment.Left
+	Label.Visible=false
+	Label.Parent=Button
 
-	tab.Button = Button
-	tab.Label = Label
+	tab.Button=Button
+	tab.Label=Label
 
 	-- Content
 	local Frame = Instance.new("Frame")
-	Frame.Size = UDim2.new(1, 0, 1, 0)
-	Frame.BackgroundTransparency = 1
-	Frame.Visible = false
-	Frame.Parent = self.ContentFrame
+	Frame.Size=UDim2.new(1,0,1,0)
+	Frame.BackgroundTransparency=1
+	Frame.Visible=false
+	Frame.Parent=self.ContentFrame
 
 	local Img = Instance.new("ImageLabel")
-	Img.Size = UDim2.new(1, 0, 1, 0)
-	Img.BackgroundTransparency = 1
-	Img.Image = TAB_ASSET_ID
-	Img.Parent = Frame
+	Img.Size=UDim2.new(1,0,1,0)
+	Img.BackgroundTransparency=1
+	Img.Image=TAB_ASSET_ID
+	Img.Parent=Frame
 
-	tab.Frame = Frame
-	self.Tabs[name] = tab
+	tab.Frame=Frame
+	self.Tabs[name]=tab
 
-	-- Button click behavior
 	Button.MouseButton1Click:Connect(function()
-		for _, t in pairs(self.Tabs) do
-			t.Frame.Visible = false
+		for _,t in pairs(self.Tabs) do
+			t.Frame.Visible=false
 		end
-		Frame.Visible = true
+		Frame.Visible=true
 	end)
 
 	return Frame
